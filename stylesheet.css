@@ -81,7 +81,7 @@ tr,
 p,
 a {
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 14px
+  font-size: 22px
 }
 
 strong {
@@ -91,12 +91,12 @@ strong {
 
 heading {
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 papertitle {
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 1px;
   font-weight: 700
 }
 
@@ -106,13 +106,13 @@ name {
 }
 
 .one {
-  width: 160px;
+  width: 320px;
   height: 160px;
   position: relative;
 }
 
 .two {
-  width: 160px;
+  width: 1000px;
   height: 160px;
   position: absolute;
   transition: opacity .2s ease-in-out;
