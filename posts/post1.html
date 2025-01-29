@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What’s Next? Pushing the Frontiers after R1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.7;
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        strong {
+            font-size: 1.2em;
+        }
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+        }
+        .navbar a {
+          margin: 0 20px;
+          text-decoration: none;
+          color: black;
+          font-size: 24px;
+          padding: 10px 20px;
+          border: 0px solid #000;
+          border-radius: 5px;
+          transition: background-color 0.3s;
+        }
+        .navbar a:hover {
+          background-color: #f0f0f0;
+        }
+        hr {
+            margin-top: 40px;
+            border: 0.5px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="../index.html">Home</a>
+        <a href="../blog.html">Blog</a>
+        <a href="https://linkedin.com/in/mertu2002">LinkedIn</a>
+        <a href="https://x.com/mertunsal2020">Twitter</a>
+    </div>
+
+    <h1>What’s Next? Pushing the Frontiers after R1</h1>
+
+    <p style="font-size: 0.8em; color: #666; margin-top: -10px;">January 29, 2025</p>
+
+    <p>
+        <a href="https://github.com/deepseek-ai/DeepSeek-R1">DeepSeek R1</a> showed us OpenAI didn’t use a magic wand to create o1. The idea was simple:
+        <ul>
+            <li>Train an extremely capable pre-trained base model.</li>
+            <li>Use a large corpus of question and ground truth pairs, or a reliable verifier, to run large-scale reinforcement learning.</li>
+        </ul>
+    </p>
+
+    <p>
+      This recipe works well because it avoids introducing implicit biases, instead only  incentivizing the model to discover its own ways to solve problems correctly via binary rewards. It’s an amazing step toward AGI, but it’s far from the full story. What does it take to push it further? Let’s break it down by exploring the requirements for this to work and what we need to address next.
+    </p>
+
+    <h2>1. We still need verifiable rewards.</h2>
+
+    <p>
+       For RL to work, there must be a reliable way to evaluate the model’s output. In many tasks, such as coding or solving math problems, we can use compilers, test cases, or clear ground truths. However, things get tricky when tasks don’t have straightforward verifiable rewards. Examples include evaluating creative writing, where quality is subjective, or verifying a mathematical proof, booking a flight ticket, or addressing a generic question like, “Here is some data, develop the most accurate ML model.”
+    </p>
+
+    <p>
+      The first case—subjective evaluation—is inherently difficult to solve with current systems. But for tasks like theorem proving or booking flights, humans (especially experts) can often verify outcomes even if solving the task is non-trivial. A true AGI should excel in such tasks. One potential pathway is to build specialized verifier tools wherever possible and explore frameworks that leverage LLMs as general-purpose verifiers augmented with these tools.
+    </p>
+
+    <p>
+        For instance, the <a href="https://github.com/MoonshotAI/Kimi-k1.5/blob/main/Kimi_k1.5.pdf">Kimi1.5</a> model by Moonshot uses a CoT verifier: a secondary LLM aware of the ground truth evaluates the policy model’s response step-by-step to decide if it is correct. This approach could be extended to handle two key cases:
+        <ul>
+            <li>Tasks where the verifier model uses a tool for validation (e.g., calling a Lean 4 compiler for formal proofs).</li>
+            <li>Tasks where the verifier evaluates open-ended solutions and assigns rewards, even if the task isn’t well-defined or the model is not aware of a ground truth.</li>
+        </ul>
+    </p>
+
+    <p>
+      The second case is particularly challenging because it may require the verifier to evaluate solutions to problems it cannot solve itself. For instance, assessing the correctness of a complex mathematical proof could be beyond the verifier’s own capabilities. Hence, the main limitation here lies in the model's own comprehension boundary. However, there are still many tasks where verification is significantly easier than finding the solution. For example, checking whether a flight is successfully booked can be done by verifying the PNR on the airline’s website. To make this approach viable, we need to minimize false positives with strict verifiers and ensure the LLM has sufficient expertise in the domain it is tasked with evaluating. Yet, this still remains to be an open problem.
+    </p>
+
+    <p>
+      After all, it’s not AGI if we can’t ask for tasks that aren’t well-defined.
+    </p>
+
+    <h2>2. We still need a large corpus of diverse problems with incremental difficulty.</h2>
+
+    <p>
+      The foundation of RL pipelines is a corpus of problems that are both diverse and incrementally challenging. If the difficulty spectrum has big leaps, models will fail to bridge the gaps. For example, if only middle school and graduate-level math problems are present with nothing in between, the model will most likely struggle to generalize.
+    </p>
+
+    <p>
+      Moreover, current pipelines rely heavily on static problem sets. For AGI, we need models that can autonomously expand their corpus, finding new problems or tasks to solve without human intervention. The current approach shows little potential for continuous improvement beyond the questions we feed to it.
+    </p>
+
+    <p>
+      One open question is the following: how can we sample problems to maximize efficiency? Sample too hard, and the model won’t be able to solve them. Sample too easy, and the model will solve them without learning anything new. Finding the optimal boundary of improvement is key to ensuring steady progress without deteriorating the model’s overall capabilities. The Kimi K1.5 paper addresses this with two different techniques:
+    </p>
+
+    <ul>
+      <li><b>Curriculum Sampling:</b> This method starts by focusing on easier problems and gradually shifts to more challenging ones. The idea is to mimic a human-like learning process, where the model builds confidence and capability incrementally.</li>
+      <li><b>Priority Sampling:</b> Here, the success rate s_i of each problem is tracked, and problems are sampled in proportion to 1 - s_i. This prioritizes problems that the model struggles with, ensuring its training remains focused on areas needing improvement.</li>
+    </ul>
+
+    <p>
+      A second intriguing direction is inspired by the following hypothesis: a strong model should know what problems lie at its boundary. This raises the possibility of tasking the model to autonomously expand its corpus by discovering new problems or tasks without human intervention. Tools like <a href="https://github.com/browser-use/browser-use">Browser Use</a>, which enable models to surf the internet, could be useful here. A model could continuously find, analyze, and add interesting tasks to its training corpus, leading to a self-improving system.
+    </p>
+
+    <p>
+      After all, AGI must not be limited by its database—it should both expand its knowledge base independently towards new domains and keep remastering its strengths through dedicated practice.
+    </p>
+
+    <h2>3. We still need a capable pre-trained model with non-zero base capacity.</h2>
+
+    <p>
+      For RL to work effectively, the base model must have some foundational capability in the task domain. Without this, the model will struggle to receive positive rewards, as it won’t be able to solve any problems in the corpus. This is a critical limitation in areas like solving ARC-like puzzles, where pre-trained models lack baseline competence. If the model cannot produce even partially correct responses, reinforcement learning cannot bootstrap its way to meaningful performance.
+    </p>
+
+    <p>
+      For example, using RL to generate code in a completely new programming language that hasn’t appeared in the model’s pretraining simply doesn’t work. In my own work, I see this limitation prevents the application of RL to write mathematical proofs in Lean 4. The original pre-trained model cannot reliably generate Lean 4 code, making it impossible to start a productive RL training loop. 
+    </p>
+
+    <p>
+      One way to address this is by enabling models to generalize to new tasks through tool use. It is unreasonable to expect a model to produce Lean 4 code immediately, but it should be able to use documentation and examples to learn and improve. A promising experiment would involve giving the model access to browser-based tools, allowing it to look up Lean 4 documentation, explore example proofs online, and iteratively improve its output. Once the model manages to generate good solutions in-context, the new abilities would make its way into the model weights via the RL pipeline.
+    </p>
+
+    <p>
+      The ability to adapt and generalize is essential for AGI.
+    </p>
+
+    <h2>4. Tool Use</h2>
+
+    <p>
+      As you might have gathered from all my previous comments, I believe we desperately need to integrate tool use natively to “thinking” models. This is essential to extend a model’s capabilities, improve efficiency, and allow it to solve more complex tasks. Ideally, these tools should be generic (e.g., writing code, searching documentation, running scripts, using a filesystem) so the model is not overwhelmed and can access other tools when deemed necessary through something like a browser.
+    </p>
+
+    <p>
+      I believe this is a low-hanging fruit with perhaps a simple solution: list available tools in the system prompt during RL training and allow the model to explore them as part of the learning process. I would love to see/do some experiments that try this.
+    </p>
+
+    <h2><strong>So, are we getting AGI?</strong></h2>
+
+    <p>
+      Well, yes and no. We know a very, very good trick that scales well. We can increase capability for <b>well-defined tasks</b> in domains where we can collect <b>large-scale data of smooth changes in difficulty</b> and a pre-trained model that has a <b>base capability of solving problems</b>. 
+    </p>
+
+    <p>
+      We still need to figure out how to allow <b>continuous improvement</b> by generating new questions to be answered, <b>generalize to new tasks</b> through “intermediate research” or tool use, and how to handle much more <b>generic tasks</b> with rewards not well defined.
+    </p>
+
+    <h2><strong>Further Questions</strong></h2>
+
+    <ul>
+      <li>How to curate a list of tools to be used by such a model? We can do some simple experiments with Browser Use and Python as tools: the combination of these two should already allow a wide range of capabilities.</li>
+      <li>Let's assume we have a very capable model that can use tools. Can we create some very concrete scenarios of undesired behaviors? This can be a first step towards preventing them. </li>
+    </ul>
+
+    <hr>
+
+    <p><strong>Follow me here:</strong></p>
+    <p>
+        <a href="https://x.com/mertunsal2020">Twitter</a> |
+        <a href="https://linkedin.com/in/mertu2002">LinkedIn</a>
+    </p>
+
+</body>
+</html>
